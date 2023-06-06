@@ -38,10 +38,10 @@
 }
 
 .container {
-  display: grid;
+  display: flex;
   grid-template-columns: 1fr;
-  gap: 20px;
-  max-width: 600px;
+  gap: 1px;
+  max-width: 1200px;
   width: 100%;
 }
 
@@ -52,6 +52,7 @@
   padding-top: 2px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(195, 129, 84, 0.3);
+  flex: 1 1 auto
 }
 
 .user-info,
@@ -115,6 +116,7 @@ body {
   background-color: #C38154;
   color: #fff;
   border: none;
+  min-width: 80px;
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
@@ -125,4 +127,55 @@ body {
 
 .button:hover {
   background-color: #bb703e;
+}
+
+.userItemWrap{
+  display: flex;
+  align-items: center;
+  border: 1px black;
+}
+
+.userItem-left{
+  display:flex;
+  flex: 0 0 auto;
+  margin-right: 1rem;
+  justify-content: left;
+}
+
+.userItem-right{
+  flex:1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+}
+
+.profileThumb{
+  width: 15%;
+  height: auto;
+}
+
+.sidebar {
+  display: flex;
+  min-height: 200px;
+  max-width: 50px;
+  border: 2px solid black;
+  background-color: #884A39;
+  padding: 20px;
+  padding-top: 2px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(195, 129, 84, 0.3);
+  flex: 0 0 auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: space-around;
+  justify-content: center;
+
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  /* Add other styles for the navbar */
 }

@@ -1,37 +1,37 @@
 
 import {useState, useEffect} from 'react';
 import Web3 from 'web3';
-import LibraryContract from "../src/Library.json"
-
+import FriendshipPlatform from "../src/contract/FriendshipPlatfrom.json";
 import './App.css';
 
 function App() {
-  //const [web3, setWeb3] = useState(null);
   const [result, setResult] = useState(null);
   const [accounts, setAccounts] = useState([])
   const [network, setNetwork] = useState()
   const [balance, setBalance] = useState()
-  const [libraryContract, setLibraryContract] = useState(null);
+  const [friendshipPlatform, setFriendshipPlatform] = useState(null);
+  const [otherUsersData, setOtherUsersData] = useState([]);
+  const [userData, setUserData] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [pendingRequestsData, setPendingRequestsData] = useState();
+  const [friendsList, setFriendsList] = useState();
+  const [userName, setUserName] = useState(' ');
   const web3 = new Web3(Web3.givenProvider);
-  // let balanceS= {
-  //   account: '',
-  //   network: '',
-  //   balance: ''
-  // }
-  // const [balance, setBalance] = useState(balanceS)
-  //0x83061E66A44295f7faA07D78A9D0098d6825b988
+
+
   useEffect(()=>{
-    //console.log(web3);
-    //loadAccounts();
     loadBlockchainData();
-    //console.log(libraryContract);
-    //console.log(accounts)
-    
   }, [])
 
   useEffect(()=>{
+    get_all_users();
+  },[friendshipPlatform])
+
+  useEffect(()=>{
     loadBalance()
+    get_my_user()
   }, [accounts])
+
 
 
   async function loadBlockchainData() {
@@ -44,41 +44,13 @@ function App() {
       //const deployedNetwork = LibraryContract.networks[networkId];
       //console.log(deployedNetwork);
       const contract = new web3.eth.Contract(
-        LibraryContract,
-        '0x83061E66A44295f7faA07D78A9D0098d6825b988'
+        FriendshipPlatform,
+        '0xae929eC5ED485c98Cc2375697956891208f29F50'
       );
-      setLibraryContract(contract);
+      setFriendshipPlatform(contract);
     }
   }
   
-  async function callLibraryMethod() {
-    //console.log(libraryContract)
-    if (libraryContract) {
-      try {
-        const result = await libraryContract.methods.add_book('desko11','de1s1ko').send({ from: accounts[0] });
-        setResult(result);
-        console.log(result)
-       // console.log(libraryContract);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  }
-
-  async function readBooks() {
-   // console.log(libraryContract)
-    if (libraryContract) {
-      try {
-        const result = await libraryContract.methods.read_all_books().call({ from: accounts[0] });
-        setResult(result);
-        console.log(result)
-        //console.log(libraryContract);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  }
-
   async function loadBalance(){
     //console.log(account)
     try {
@@ -105,58 +77,85 @@ function App() {
     //console.log(web3.utils.toChecksumAddress(accounts[0]));
   }
 
-  const userData = {
-    name: 'Your Name',
-    profilePicture: 'your-profile-picture-url',
-  };
-  
-  // Sample pending friend requests
-  const pendingRequestsData = [
-    {
-      id: 1,
-      senderName: 'Friend Request Sender 1',
-      senderProfilePicture: 'sender-1-profile-picture-url',
-    },
-    {
-      id: 2,
-      senderName: 'Friend Request Sender 2',
-      senderProfilePicture: 'sender-2-profile-picture-url',
-    },
-  ];
-  
-  // Sample other users
-  const otherUsersData = [
-    {
-      id: 3,
-      name: 'Other User 1',
-      profilePicture: 'other-user-1-profile-picture-url',
-    },
-    {
-      id: 4,
-      name: 'Other User 2',
-      profilePicture: 'other-user-2-profile-picture-url',
-    },
-    // ... more users
-  ];
-  
+  // function UserInfo() {
+  //   const placeholderImage = 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
+  //   return (
+  //     <div>
+  //       <h2 style = {{marginTop: '5px'}}>Your profile</h2>
+  //       <div className='userItemWrap'>
+  //       <div className='userItem-left'>
+  //         <img className='profileThumb' src={placeholderImage} alt="Sender Profile" />
+  //       </div>
+  //       {/* Additional user details */}
+  //       <div className='userItem-right' style={{alignItems: 'flex-end'}}>
+  //         <h3>{userData.name}</h3>
+  //       </div>
+  //       <br></br>
+  //     </div>
+  //   </div>
+  //   );
+  // }
+
   function UserInfo() {
+    const placeholderImage =
+      'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
+  
+    // Check if user exists with the specified address
+    const userExists = userData.address == accounts[0];
+    
+    
+
     return (
       <div>
-        <h2 style = {{marginTop: '5px'}}>{userData.name}</h2>
-        <img src={userData.profilePicture} alt="Profile" />
-        {/* Additional user info */}
+        {userExists ? (
+          <div>
+            <h2 style={{ marginTop: '5px' }}>Your Profile</h2>
+            <div className="userItemWrap">
+              <div className="userItem-left">
+                <img className="profileThumb" src={placeholderImage} alt="Sender Profile" />
+              </div>
+              {/* Additional user details */}
+              <div className="userItem-right" style={{ alignItems: 'flex-end' }}>
+                <h3>{userData.name}</h3>
+              </div>
+              <br />
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h2 style={{ marginTop: '5px' }}>Register</h2>
+            
+            <input type='text' value={userName} onChange={e=>setUserName(e.target.value)} />
+            <button className='button' onClick={() => register(userName)}>Register</button>
+          </div>
+        )}
       </div>
     );
   }
   
   function PendingFriendRequest({ request }) {
+    const placeholderImage = 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
     return (
-      <div>
-        <h3 style = {{marginTop: '5px'}}>{request.senderName}</h3>
-        <img src={request.senderProfilePicture} alt="Sender Profile" />
-        {/* Additional request details */}
+      <div className='userItemWrap'>
+        <div className='userItem-left'>
+          <img className='profileThumb' src={placeholderImage} alt="Sender Profile" />
+        </div>
+        {/* Additional user details */}
+        <div className='userItem-right'>
+          <h3>{request.senderName}</h3>
+          <button className='button' onClick={() => accept_request(request.address)}>Accept</button>
+        </div>
+        <br></br>
       </div>
+
     );
+    // return (
+    //   <div>
+    //     <h3 style = {{marginTop: '5px'}}>{request.senderName}</h3>
+    //     <img src={request.senderProfilePicture} alt="Sender Profile" />
+    //     {/* Additional request details */}
+    //   </div>
+    // );
   }
   
   function FriendRequests() {
@@ -171,57 +170,263 @@ function App() {
   }
   
   function UserItem({ user }) {
+    const placeholderImage = 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
     return (
-      <div>
-        <h3>{user.name}</h3>
-        <img src={user.profilePicture} alt="User Profile" />
+      <div className='userItemWrap'>
+        <div className='userItem-left'>
+          <img className='profileThumb' src={placeholderImage} alt="User Profile" />
+        </div>
         {/* Additional user details */}
-        <button className='button'>Add Friend</button>
+        <div className='userItem-right'>
+          <h3>{user.name}</h3>
+          <button className='button' onClick={() => send_friend_request(user.address)}>Add Friend</button>
+        </div>
       </div>
     );
   }
-  
-  function OtherUsers() {
+
+  function FriendItem({ user }) {
+    const placeholderImage = 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
     return (
-      <div>
-        <h2 style = {{marginTop: '5px'}}>Other Users</h2>
-        {otherUsersData.map((user) => (
-          <UserItem key={user.id} user={user} />
-        ))}
+      <div className='userItemWrap'>
+        <div className='userItem-left'>
+          <img className='profileThumb' src={placeholderImage} alt="User Profile" />
+        </div>
+        {/* Additional user details */}
+        <div className='userItem-right'>
+          <h3>{user.name}</h3>
+        </div>
       </div>
     );
   }
+
+  function Sidebar() {
+    return (
+      <div className="sidebar">
+        <button className='button' onClick={() => setSelectedOption('otherUsers')}>Other Users</button>
+        <button className='button' onClick={() => setSelectedOption('friendRequests')}>Pending Friend Requests</button>
+        <button className='button' onClick={() => setSelectedOption('yourFriends')}>Your friends</button>
+      </div>
+    );
+  }
+
+  async function add_dummy(){
+    if (friendshipPlatform) {
+      try {
+        const result = await friendshipPlatform.methods.addDummyUsers(["Dummy User 1", "Dummy User 2", "Dummy User 3"], ["0x1111111111111111111111111111111111111111", "0x2222222222222222222222222222222222222222", "0x3333333333333333333333333333333333333333"]).send({ from: accounts[0] });
+        setResult(result);
+        //userData.name = "desimir";
+        console.log(result)
+        //console.log(libraryContract);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
+  async function register(_name){
+    if (friendshipPlatform) {
+      try {
+        const result = await friendshipPlatform.methods.register_new_user(_name).send({ from: accounts[0] });
+        setResult(result);
+        const user = {
+        id: result.id,
+        name: result.name,
+        profilePicture: 'url-for-user-profile-picture',
+        address: accounts[0]
+      };
+        setUserData(user);
+        
+        //userData.name = "desimir";
+        console.log("register")
+        console.log(result)
+        //console.log(libraryContract);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+async function get_all_users() {
+  if (friendshipPlatform) {
+    try {
+      const result = await friendshipPlatform.methods.get_all_users().call({ from: accounts[0] });
+      setResult(result);
+      console.log(result);
+      const users = result
+        .filter((user) => user.my_address !== accounts[0]) // Exclude user with your address
+        .map((user) => ({
+          id: user.id,
+          name: user.name,
+          profilePicture: 'url-for-user-profile-picture',
+          address: user.my_address
+        }));
+
+      const my_user = result.find((user)=>user.my_address == accounts[0]);
+
+      // Update the otherUsersData state
+      setOtherUsersData(users);
+
+      setUserData({
+        id: my_user.id,
+        name: my_user.name,
+        profilePicture: 'url-for-user-profile-picture',
+        address: my_user.my_address
+      })
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+async function get_my_user(){
+  if (friendshipPlatform) {
+    try {
+      const result = await friendshipPlatform.methods.get_all_users().call({ from: accounts[0] });
+      setResult(result);
+      const my_user = result.find((user)=>user.my_address == accounts[0]);
+      console.log(my_user);
+
+      const pendingRequestsData = [];
+      const friendsListdata = []
+
+      if (my_user && my_user.friend_requests_list) {
+        my_user.friend_requests_list.forEach(async (friendRequest) => {
+          const result = await friendshipPlatform.methods.users(friendRequest).call({ from: accounts[0] });
+          //here is data about friend on address friendRequest
+
+          const pendingRequest = {
+            id: result.id,
+            senderName: result.name,
+            senderProfilePicture: 'url-for-sender-profile-picture',
+            address: result.my_address
+          };
+
+          // Push the pending request to the array
+          pendingRequestsData.push(pendingRequest);
+        });
+      }
+      if (my_user && my_user.friends_list) {
+        my_user.friends_list.forEach(async (friend) => {
+          const result = await friendshipPlatform.methods.users(friend).call({ from: accounts[0] });
+          //here is data about friend on address friendRequest
+
+          const friend_inst = {
+            id: result.id,
+            name: result.name,
+            senderProfilePicture: 'url-for-sender-profile-picture',
+            address: result.my_address
+          };
+
+          // Push the pending request to the array
+          friendsListdata.push(friend_inst);
+        });
+      }
+
+      setPendingRequestsData(pendingRequestsData);
+      setFriendsList(friendsListdata);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+async function send_friend_request(address){
+  if (friendshipPlatform) {
+    try {
+      const result = await friendshipPlatform.methods.send_request(address).send({ from: accounts[0] });
+      setResult(result);
+      console.log(result);
+      get_my_user();
+      //setFriendshipPlatform(my_user.friend_requests_list);
+      //console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+async function accept_request(address){
+  if (friendshipPlatform) {
+    try {
+      const result = await friendshipPlatform.methods.accept_request(address).send({ from: accounts[0] });
+      setResult(result);
+      console.log(result);
+      get_my_user();
+      //setFriendshipPlatform(my_user.friend_requests_list);
+      //console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+  
+function OtherUsers() {
+  const excludedAddresses = [
+    ...friendsList.map((friend) => friend.address),
+    ...pendingRequestsData.map((request) => request.address),
+  ];
+
+  // Filter the otherUsersData to exclude friends and pending request senders
+  const filteredUsersData = otherUsersData.filter(
+    (user) => !excludedAddresses.includes(user.address)
+  );
+  return (
+    <div>
+      <h2 style={{ marginTop: '5px' }}>Other Users</h2>
+      {filteredUsersData.length > 0 ? (
+        filteredUsersData.map((user) => <UserItem key={user.id} user={user} />)
+      ) : (
+        <p>No other users found.</p>
+      )}
+    </div>
+  );
+}
+
+function YourFriends() {
+  return (
+    <div>
+      <h2 style={{ marginTop: '5px' }}>Your Friends</h2>
+      {friendsList.length > 0 ? (
+        friendsList.map((user) => <FriendItem key={user.id} user={user} />)
+      ) : (
+        <p>You have no friends, yet.</p>
+      )}
+    </div>
+  );
+}
+
+let selectedSection;
+if (selectedOption === 'otherUsers') {
+  selectedSection = <OtherUsers />;
+} else if (selectedOption === 'friendRequests') {
+  selectedSection = <FriendRequests />;
+} else if (selectedOption === 'yourFriends'){
+  selectedSection = <YourFriends />
+}
 
   return (
     <div className="App">
-      <header className="App-header">
-        Desimire ajd mozes ti to!
-        <p>
-          Your accounts: {accounts}
-        </p>
-        <p>
-          Your Balance: {balance}
-          
-        </p>
-        <button onClick={callLibraryMethod}>Call Library Method</button>
-        {result && <p>Result: {}</p>}
-
-        <button onClick={readBooks}>read</button>
-        {result && <p>Result: {}</p>}
+      <header>
       </header>
       <body>
+        {/* <form></form>
+        <button onClick={register}>register</button>
+        <button onClick={add_dummy}>add_dummy</button>
+        <button onClick={get_all_users}>read_all</button>
+        <button onClick={get_my_user}>read me</button> */}
+        <div className='navbar'>
+          <div className='section'>{UserInfo()}</div>
+        </div>
         <div className='wrap-container'>
-          <div className="container">
-            <div className="section">
-              <UserInfo />
-            </div>
-            <div className="section">
-              <FriendRequests />
-            </div>
-            <div className="section">
-              <OtherUsers />
-            </div>
+          
+          <div className='container'>
+              <div style={{display: 'flex'}}><Sidebar /></div>
+              <div className='section'>
+                {selectedSection}
+              </div>
+            
           </div>
+          
           </div>
           </body>
     </div>

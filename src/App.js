@@ -45,7 +45,7 @@ function App() {
       //console.log(deployedNetwork);
       const contract = new web3.eth.Contract(
         FriendshipPlatform,
-        '0xae929eC5ED485c98Cc2375697956891208f29F50'
+        '0x3D443139d4F9698d0266B1Db692B6A8CAD61E3e7'
       );
       setFriendshipPlatform(contract);
     }
@@ -144,6 +144,7 @@ function App() {
         <div className='userItem-right'>
           <h3>{request.senderName}</h3>
           <button className='button' onClick={() => accept_request(request.address)}>Accept</button>
+          <button className='button-decline' onClick={() => decline_request(request.address)}>Decline</button>
         </div>
         <br></br>
       </div>
@@ -349,6 +350,21 @@ async function accept_request(address){
   if (friendshipPlatform) {
     try {
       const result = await friendshipPlatform.methods.accept_request(address).send({ from: accounts[0] });
+      setResult(result);
+      console.log(result);
+      get_my_user();
+      //setFriendshipPlatform(my_user.friend_requests_list);
+      //console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+async function decline_request(address){
+  if (friendshipPlatform) {
+    try {
+      const result = await friendshipPlatform.methods.decline_request(address).send({ from: accounts[0] });
       setResult(result);
       console.log(result);
       get_my_user();
